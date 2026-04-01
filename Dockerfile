@@ -1,18 +1,13 @@
-# Stage 1: Build the JAR using Maven
-FROM maven:3.8.4-openjdk-17-slim AS build
+# Stage 1: Build using Maven and Java 25
+FROM maven:3.9.9-eclipse-temurin-25-alpine AS build
 WORKDIR /app
-# Copy the pom.xml and source code
-COPY pom.xml .
-COPY src ./src
-# Build the application
+COPY . .
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the JAR using JDK
-FROM openjdk:17-jdk-slim
+# Stage 2: Run using Java 25
+FROM eclipse-temurin:25-jdk-alpine
 WORKDIR /app
-# Copy the JAR from the build stage
-COPY --from=build /app/target/*.jar app.jar
-# Expose the port
+# Note: Your pom.xml says <finalName>hotel_backend</finalName>
+COPY --from=build /app/target/hotel_backend.jar app.jar
 EXPOSE 8080
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
